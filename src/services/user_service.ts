@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { v4 as uuid } from "uuid";
-import UserStatus from '../enums/user_status';
-import User from '../interfaces/user';
+import UserStatus from "../enums/user_status";
+import User from "../interfaces/user";
 import Language from "../enums/language";
 
 export default class UserService {
@@ -19,11 +19,13 @@ export default class UserService {
       username,
       intro,
       language,
-      status: UserStatus.WAITING
+      status: UserStatus.IDLE,
     };
 
     UserService.usersOnline.push(newUser);
-
+    console.log(
+      `New user added! ${newUser} we now have ${UserService.getNumberOfOnlineUsers()}`
+    );
     return newUser;
   };
 

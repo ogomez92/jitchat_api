@@ -21,9 +21,9 @@ app.get("/status", (req: Request, res: Response, next: NextFunction) => {
 
     const user = UserService.getUserWithUUID(id as string);
 
-    return res.status(200).json({ user });
+    return res.status(200).json({ ...user });
   } catch (error) {
-    return res.status(400).json({ error, message: 'error retrieving user' });
+    return res.status(500).json({ error, message: "error retrieving user" });
   }
 });
 
