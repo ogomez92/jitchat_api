@@ -5,7 +5,7 @@ export default interface User {
     id: string;
     username: string;
     intro?: string;
-    language: Language;
+    languages: Language[];
     status: UserStatus;
   }
   
