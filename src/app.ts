@@ -34,8 +34,8 @@ app.post("/newuser", async (req: Request, res: Response, next: NextFunction) => 
     const user: User = await UserService.addUserWithRequest(req);
 
     res.status(200).json(user);
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    res.status(400).send({ message: error.message });
   }
 });
 

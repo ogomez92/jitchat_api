@@ -3,7 +3,8 @@ import { v4 as uuid } from "uuid";
 import UserStatus from "../enums/user_status";
 import User from "../interfaces/user";
 import Language from "../enums/language";
-import { storageManager } from '../app';
+import { storageManager } from "../app";
+import InputValidator from "../helpers/input_validator";
 
 export default class UserService {
   public static usersOnline: User[] = [];
@@ -12,7 +13,11 @@ export default class UserService {
     const { username, intro, languages } = req.body;
 
     if (!username || !intro || !languages) {
-      throw new Error("Missing data");
+      throw new Error("invalid input");
+    }
+    
+    if (!UserService.validateNameAndIntro(username, intro)) {
+      throw new Error("invalid input");
     }
 
     const newUser: User = {
@@ -45,7 +50,7 @@ export default class UserService {
         }
       });
     });
-    
+
     return languages;
   };
 
@@ -67,5 +72,14 @@ export default class UserService {
 
   private static storeUser = async (user: User): Promise<void> => {
     await storageManager.setKey(user.id, user);
+  };
+
+  public static validateNameAndIntro = (
+    name: string,
+    intro: string
+  ): boolean => {
+    return (
+      InputValidator.isNameValid(name) && InputValidator.isIntroValid(intro)
+    );
   };
 }
