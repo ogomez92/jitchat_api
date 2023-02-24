@@ -3,11 +3,12 @@ import { v4 as uuid } from "uuid";
 import UserStatus from "../enums/user_status";
 import User from "../interfaces/user";
 import Language from "../enums/language";
+import { storageManager } from '../app';
 
 export default class UserService {
   public static usersOnline: User[] = [];
 
-  public static addUserWithRequest = (req: Request): User => {
+  public static addUserWithRequest = async (req: Request): Promise<User> => {
     const { username, intro, languages } = req.body;
 
     if (!username || !intro || !languages) {
@@ -23,6 +24,9 @@ export default class UserService {
     };
 
     UserService.usersOnline.push(newUser);
+
+    await UserService.storeUser(newUser);
+
     console.log(
       `New user added! ${newUser} online users: ${UserService.getOnlineUsersByLanguage()}`
     );
@@ -49,9 +53,19 @@ export default class UserService {
     const user = UserService.usersOnline.find((user) => user.id === id);
 
     if (!user) {
+      const storedUser = storageManager.getKey(id);
+
+      if (storedUser) {
+        return storedUser;
+      }
+
       throw new Error("user not found");
     }
 
     return user;
+  };
+
+  private static storeUser = async (user: User): Promise<void> => {
+    await storageManager.setKey(user.id, user);
   };
 }

@@ -54,7 +54,7 @@ describe("user creation", () => {
 
   it("retrieves online users expecting 1 in Spanish", async () => {
     const onlineUsers = await request(app).get("/onlineusers");
-    console.log(onlineUsers.body);
+    
     expect(onlineUsers.status).toBe(200);
     expect(onlineUsers.body[Language.SPANISH]).toBe(1);
   });

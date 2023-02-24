@@ -3,8 +3,10 @@ import helmet from "helmet";
 import UserService from "./services/user_service";
 import User from "./interfaces/user";
 import morgan from "morgan";
+import StorageManager from "./services/storage_manager";
 
 const app = express();
+export const storageManager: StorageManager = new StorageManager();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,9 +29,9 @@ app.get("/status", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-app.post("/newuser", (req: Request, res: Response, next: NextFunction) => {
+app.post("/newuser", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user: User = UserService.addUserWithRequest(req);
+    const user: User = await UserService.addUserWithRequest(req);
 
     res.status(200).json(user);
   } catch (error) {
