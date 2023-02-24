@@ -2,20 +2,23 @@ import request from "supertest";
 import app from "./app";
 import Language from "./enums/language";
 import UserStatus from "./enums/user_status";
+import EndpointError from "./enums/endpoint_error";
+
 const GOOD_INTRO = new Array(52).join('a');
 
 describe("Status, no users", () => {
   it("should respond with an error when status is called without a user", async () => {
     const response = await request(app).get("/status");
+
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe("user not specified");
+    expect(response.body.message).toBe(EndpointError.USER_NOT_SPECIFIED);
   });
 
   it("should respond with user not found if status is called with a non existant user", async () => {
     const response = await request(app).get("/status?id=foo");
 
     expect(response.status).toBe(500);
-    expect(response.body.message).toBe("error retrieving user");
+    expect(response.body.message).toBe(EndpointError.USER_RETRIEVAL);
   });
 
   it("returns an empty object for online users when no users are added", async () => {
@@ -36,7 +39,7 @@ describe("invalid user creation", () => {
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe("invalid input");
+    expect(response.body.message).toBe(EndpointError.INVALID_INPUT);
   });
 
   it("should respond with an error when no intro is specified", async () => {
@@ -48,7 +51,7 @@ describe("invalid user creation", () => {
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe("invalid input");
+    expect(response.body.message).toBe(EndpointError.INVALID_INPUT);
   });
 
   it("should respond with an error when no languages are specified", async () => {
@@ -58,6 +61,7 @@ describe("invalid user creation", () => {
     });
 
     expect(response.status).toBe(400);
+    expect(response.body.message).toBe(EndpointError.INVALID_INPUT);
   });
 
   it("should respond with an error when username is short", async () => {
@@ -70,7 +74,7 @@ describe("invalid user creation", () => {
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe("invalid input");
+    expect(response.body.message).toBe(EndpointError.INVALID_INPUT);
   });
 
   it("should respond with an error when intro is short", async () => {
@@ -83,7 +87,7 @@ describe("invalid user creation", () => {
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe("invalid input");
+    expect(response.body.message).toBe(EndpointError.INVALID_INPUT);
   });
 });
 

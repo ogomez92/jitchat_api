@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { v4 as uuid } from "uuid";
+import EndpointError from "../enums/endpoint_error";
 import UserStatus from "../enums/user_status";
 import User from "../interfaces/user";
 import Language from "../enums/language";
@@ -13,11 +14,11 @@ export default class UserService {
     const { username, intro, languages } = req.body;
 
     if (!username || !intro || !languages) {
-      throw new Error("invalid input");
+      throw new Error(EndpointError.INVALID_INPUT);
     }
     
     if (!UserService.validateNameAndIntro(username, intro)) {
-      throw new Error("invalid input");
+      throw new Error(EndpointError.INVALID_INPUT);
     }
 
     const newUser: User = {
@@ -64,7 +65,7 @@ export default class UserService {
         return storedUser;
       }
 
-      throw new Error("user not found");
+      throw new Error(EndpointError.USER_NOT_FOUND);
     }
 
     return user;
