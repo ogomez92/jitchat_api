@@ -3,7 +3,7 @@ import app from "./app";
 import Language from "./enums/language";
 import UserStatus from "./enums/user_status";
 
-describe("App", () => {
+describe("Status, no users", () => {
   it("should respond with an error when status is called without a user", async () => {
     const response = await request(app).get("/status");
     expect(response.status).toBe(400);
@@ -17,6 +17,15 @@ describe("App", () => {
     expect(response.body.message).toBe("error retrieving user");
   });
 
+  it("returns an empty object for online users when no users are added", async () => {
+    const response = await request(app).get("/onlineusers");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({});
+  });
+});
+
+describe("user creation", () => {
   it("successfully adds a new user, then retrieves its status", async () => {
     const userResponse = await request(app)
       .post("/newuser")
@@ -41,5 +50,12 @@ describe("App", () => {
     expect(statusResponse.body.intro).toBe("I am a test");
     expect(statusResponse.body.languages).toContain(Language.SPANISH);
     expect(statusResponse.body.status).toBe(UserStatus.IDLE);
+  });
+
+  it("retrieves online users expecting 1 in Spanish", async () => {
+    const onlineUsers = await request(app).get("/onlineusers");
+    console.log(onlineUsers.body);
+    expect(onlineUsers.status).toBe(200);
+    expect(onlineUsers.body[Language.SPANISH]).toBe(1);
   });
 });

@@ -37,4 +37,16 @@ app.post("/newuser", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+app.get('/onlineusers', (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const usersOnline = UserService.getOnlineUsersByLanguage();
+
+    const usersOnlineObject = Object.fromEntries(usersOnline);
+
+    res.status(200).json(usersOnlineObject);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default app;

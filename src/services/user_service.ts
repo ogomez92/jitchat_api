@@ -8,9 +8,9 @@ export default class UserService {
   public static usersOnline: User[] = [];
 
   public static addUserWithRequest = (req: Request): User => {
-    const { username, intro, language } = req.body;
+    const { username, intro, languages } = req.body;
 
-    if (!username || !intro || !language) {
+    if (!username || !intro || !languages) {
       throw new Error("Missing data");
     }
 
@@ -18,19 +18,32 @@ export default class UserService {
       id: uuid(),
       username,
       intro,
-      language,
+      languages,
       status: UserStatus.IDLE,
     };
 
     UserService.usersOnline.push(newUser);
     console.log(
-      `New user added! ${newUser} we now have ${UserService.getNumberOfOnlineUsers()}`
+      `New user added! ${newUser} online users: ${UserService.getOnlineUsersByLanguage()}`
     );
     return newUser;
   };
 
-  public static getNumberOfOnlineUsers = (): number =>
-    UserService.usersOnline.length;
+  public static getOnlineUsersByLanguage = (): Map<string, number> => {
+    const languages = new Map<string, number>();
+
+    UserService.usersOnline.forEach((user) => {
+      user.languages.forEach((language) => {
+        if (languages.has(language)) {
+          languages.set(language, languages.get(language)! + 1);
+        } else {
+          languages.set(language, 1);
+        }
+      });
+    });
+    
+    return languages;
+  };
 
   public static getUserWithUUID = (id: string): User => {
     const user = UserService.usersOnline.find((user) => user.id === id);
