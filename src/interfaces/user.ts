@@ -4,7 +4,7 @@ import UserStatus from '../enums/user_status';
 export default interface User {
     id: string;
     username: string;
-    intro?: string;
+    intro: string;
     languages: Language[];
     status: UserStatus;
   }
