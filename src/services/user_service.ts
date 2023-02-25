@@ -11,7 +11,7 @@ export default class UserService {
   public static usersOnline: User[] = [];
 
   public static addUserWithRequest = async (req: Request): Promise<User> => {
-    const { username, intro, languages } = req.body;
+    const { id, username, intro, languages } = req.body;
 
     if (!username || !intro || !languages) {
       throw new Error(EndpointError.INVALID_INPUT);
@@ -22,7 +22,7 @@ export default class UserService {
     }
 
     const newUser: User = {
-      id: uuid(),
+      id: id || uuid(),
       username,
       intro,
       languages,
