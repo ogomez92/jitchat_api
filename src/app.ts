@@ -18,7 +18,7 @@ app.listen(3456, () => {
   console.log("Server started on port 3456");
 });
 
-app.get("/status", (req: Request, res: Response, next: NextFunction) => {
+app.get("/retrieveuser", (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
 
