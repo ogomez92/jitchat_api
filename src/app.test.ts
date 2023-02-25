@@ -8,14 +8,14 @@ const GOOD_INTRO = new Array(52).join('a');
 
 describe("Status, no users", () => {
   it("should respond with an error when status is called without a user", async () => {
-    const response = await request(app).get("/status");
+    const response = await request(app).get("/retrieveuser");
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe(EndpointError.USER_NOT_SPECIFIED);
   });
 
   it("should respond with user not found if status is called with a non existant user", async () => {
-    const response = await request(app).get("/status?id=foo");
+    const response = await request(app).get("/retrieveuser?id=foo");
 
     expect(response.status).toBe(500);
     expect(response.body.message).toBe(EndpointError.USER_RETRIEVAL);
@@ -107,7 +107,7 @@ describe("user creation", () => {
     expect(userResponse.body.languages).toContain(Language.SPANISH);
 
     const statusResponse = await request(app).get(
-      `/status?id=${userResponse.body.id}`
+      `/retrieveuser?id=${userResponse.body.id}`
     );
 
     expect(statusResponse.status).toBe(200);
