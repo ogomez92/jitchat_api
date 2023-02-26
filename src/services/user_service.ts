@@ -8,7 +8,7 @@ import { storageManager } from "../app";
 import InputValidator from "../helpers/input_validator";
 
 export default class UserService {
-  public static usersOnline: User[] = [];
+  public static usersOnline: Map<string, User> = new Map();
 
   public static addUserWithRequest = async (req: Request): Promise<User> => {
     const { id, username, intro, languages } = req.body;
@@ -29,34 +29,20 @@ export default class UserService {
       status: UserStatus.IDLE,
     };
 
-    UserService.usersOnline.push(newUser);
+    UserService.usersOnline.set(newUser.id, newUser);
 
     await UserService.storeUser(newUser);
 
     console.log(
-      `New user added! ${newUser} online users: ${UserService.getOnlineUsersByLanguage()}`
+      `New user added! ${newUser} online users: ${UserService.getOnlineUsers()}`
     );
     return newUser;
   };
 
-  public static getOnlineUsersByLanguage = (): Map<string, number> => {
-    const languages = new Map<string, number>();
-
-    UserService.usersOnline.forEach((user) => {
-      user.languages.forEach((language) => {
-        if (languages.has(language)) {
-          languages.set(language, languages.get(language)! + 1);
-        } else {
-          languages.set(language, 1);
-        }
-      });
-    });
-
-    return languages;
-  };
+  public static getOnlineUsers = (): number => UserService.usersOnline.size;
 
   public static getUserWithUUID = (id: string): User => {
-    const user = UserService.usersOnline.find((user) => user.id === id);
+    const user: User | undefined = UserService.usersOnline.get(id);
 
     if (!user) {
       const storedUser = storageManager.getKey(id);

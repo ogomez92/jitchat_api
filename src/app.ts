@@ -42,11 +42,9 @@ app.post("/newuser", async (req: Request, res: Response, next: NextFunction) => 
 
 app.get('/onlineusers', (req: Request, res: Response, next: NextFunction) => {
   try {
-    const usersOnline = UserService.getOnlineUsersByLanguage();
+    const usersOnline = UserService.getOnlineUsers();
 
-    const usersOnlineObject = Object.fromEntries(usersOnline);
-
-    res.status(200).json(usersOnlineObject);
+    res.status(200).json(usersOnline);
   } catch (error) {
     next(error);
   }

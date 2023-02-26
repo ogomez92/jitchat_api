@@ -21,11 +21,11 @@ describe("Status, no users", () => {
     expect(response.body.message).toBe(EndpointError.USER_RETRIEVAL);
   });
 
-  it("returns an empty object for online users when no users are added", async () => {
+  it("returns 0 for online users when no users are added", async () => {
     const response = await request(app).get("/onlineusers");
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({});
+    expect(response.body).toEqual(0);
   });
 });
 
@@ -117,10 +117,10 @@ describe("user creation", () => {
     expect(statusResponse.body.status).toBe(UserStatus.IDLE);
   });
 
-  it("retrieves online users expecting 1 in Spanish", async () => {
+  it("retrieves online users expecting 1", async () => {
     const onlineUsers = await request(app).get("/onlineusers");
 
     expect(onlineUsers.status).toBe(200);
-    expect(onlineUsers.body[Language.SPANISH]).toBe(1);
+    expect(onlineUsers.body).toBe(1);
   });
 });
