@@ -1,6 +1,5 @@
 import request from "supertest";
 import app from "./app";
-import Language from "./enums/language";
 import UserStatus from "./enums/user_status";
 import EndpointError from "./enums/endpoint_error";
 
@@ -35,7 +34,6 @@ describe("invalid user creation", () => {
       .post("/newuser")
       .send({
         intro: GOOD_INTRO,
-        languages: [Language.SPANISH],
       });
 
     expect(response.status).toBe(400);
@@ -47,18 +45,7 @@ describe("invalid user creation", () => {
       .post("/newuser")
       .send({
         username: "oriol",
-        languages: [Language.SPANISH],
       });
-
-    expect(response.status).toBe(400);
-    expect(response.body.message).toBe(EndpointError.INVALID_INPUT);
-  });
-
-  it("should respond with an error when no languages are specified", async () => {
-    const response = await request(app).post("/newuser").send({
-      username: "oriol",
-      intro: GOOD_INTRO,
-    });
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe(EndpointError.INVALID_INPUT);
@@ -68,10 +55,10 @@ describe("invalid user creation", () => {
     const response = await request(app)
       .post("/newuser")
       .send({
-        username: "asdf",
+        username: "a",
         intro: GOOD_INTRO,
-        languages: [Language.SPANISH],
       });
+    console.log(response.body);
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe(EndpointError.INVALID_INPUT);
@@ -83,7 +70,6 @@ describe("invalid user creation", () => {
       .send({
         username: "oriol",
         intro: "I am a test",
-        languages: [Language.SPANISH],
       });
 
     expect(response.status).toBe(400);
@@ -98,13 +84,11 @@ describe("user creation", () => {
       .send({
         username: "oriol",
         intro: GOOD_INTRO,
-        languages: [Language.SPANISH],
       });
 
     expect(userResponse.status).toBe(200);
     expect(userResponse.body.username).toBe("oriol");
     expect(userResponse.body.intro).toBe(GOOD_INTRO);
-    expect(userResponse.body.languages).toContain(Language.SPANISH);
 
     const statusResponse = await request(app).get(
       `/retrieveuser?id=${userResponse.body.id}`
@@ -113,7 +97,6 @@ describe("user creation", () => {
     expect(statusResponse.status).toBe(200);
     expect(statusResponse.body.username).toBe("oriol");
     expect(statusResponse.body.intro).toBe(GOOD_INTRO);
-    expect(statusResponse.body.languages).toContain(Language.SPANISH);
     expect(statusResponse.body.status).toBe(UserStatus.IDLE);
   });
 

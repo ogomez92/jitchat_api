@@ -1,9 +1,12 @@
 import express, { Request, Response, NextFunction } from "express";
 import helmet from "helmet";
+import cors from 'cors';
+import morgan from "morgan";
+
 import EndpointError from "./enums/endpoint_error";
 import UserService from "./services/user_service";
 import User from "./interfaces/user";
-import morgan from "morgan";
+
 import StorageManager from "./services/storage_manager";
 
 const app = express();
@@ -12,7 +15,15 @@ export const storageManager: StorageManager = new StorageManager();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
-app.use(morgan("tiny"));
+
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://localhost:5173'],
+  allowedHeaders: ['Content-Type'],
+}));
+
+app.use(morgan('tiny'))
+
+app.options('*', cors())
 
 app.get("/retrieveuser", (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -45,7 +56,9 @@ app.get('/onlineusers', (req: Request, res: Response, next: NextFunction) => {
     const usersOnline = UserService.getOnlineUsers();
 
     res.status(200).json(usersOnline);
+    next();
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });

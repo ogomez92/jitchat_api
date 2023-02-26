@@ -1,19 +1,18 @@
 import { Request, Response } from "express";
-import { v4 as uuid } from "uuid";
 import EndpointError from "../enums/endpoint_error";
 import UserStatus from "../enums/user_status";
 import User from "../interfaces/user";
-import Language from "../enums/language";
 import { storageManager } from "../app";
 import InputValidator from "../helpers/input_validator";
+import uuid from 'short-uuid';
 
 export default class UserService {
   public static usersOnline: Map<string, User> = new Map();
 
   public static addUserWithRequest = async (req: Request): Promise<User> => {
-    const { id, username, intro, languages } = req.body;
+    const { id, username, intro } = req.body;
 
-    if (!username || !intro || !languages) {
+    if (!username || !intro) {
       throw new Error(EndpointError.INVALID_INPUT);
     }
     
@@ -22,10 +21,9 @@ export default class UserService {
     }
 
     const newUser: User = {
-      id: id || uuid(),
+      id: id || uuid.generate(),
       username,
       intro,
-      languages,
       status: UserStatus.IDLE,
     };
 
@@ -33,9 +31,6 @@ export default class UserService {
 
     await UserService.storeUser(newUser);
 
-    console.log(
-      `New user added! ${newUser} online users: ${UserService.getOnlineUsers()}`
-    );
     return newUser;
   };
 

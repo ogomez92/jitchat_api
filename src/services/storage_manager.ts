@@ -18,7 +18,6 @@ export default class StorageManager {
   }
 
   public async syncToFile(): Promise<void> {
-    console.log('sync', this.data)
     return fs.writeFileSync("data.json", JSON.stringify(this.data));
   }
 
