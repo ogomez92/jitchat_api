@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import EndpointError from "../enums/endpoint_error";
 import UserStatus from "../enums/user_status";
 import User from "../interfaces/user";
-import { storageManager } from "../routes/";
+import { storageManager } from "../app";
 import InputValidator from "../helpers/input_validator";
 import uuid from 'short-uuid';
 
