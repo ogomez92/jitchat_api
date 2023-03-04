@@ -5,6 +5,6 @@ export default interface User {
     id: string;
     username: string;
     intro: string;
-    status: UserStatus;
+    status?: UserStatus;
   }
   

@@ -1,7 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { PORT } from '../server';
 import UserService from "../services/user_service";
 import UserStatus from "../enums/user_status";
+import User from "../interfaces/user";
+import EventType from "../enums/event_type";
 
 const router = Router();
 
@@ -17,10 +18,11 @@ router.get('/events/:userID', (req, res) => {
     'Connection': 'keep-alive'
   });
   res.flushHeaders();
+
   try {
     UserService.setStatus(userID, UserStatus.WAITING)
   } catch (error) {
-    // The user is not registered as online, close the connection.
+    // Close the connection, because that ID is neither online nor in storage.
     res.end();
   }
 
@@ -41,7 +43,7 @@ router.get('/events/:userID', (req, res) => {
   });
 });
 
-export const sendEventToUser = (userID: string, eventName: string, data: string) => {
+export const sendEventToUser = (userID: string, eventName: EventType, data: string) => {
   const userResponseHandle: Response | undefined = userEventResponses.get(userID);
 
   if (!userResponseHandle) {

@@ -17,7 +17,7 @@ export default class StorageManager {
     return await this.syncToFile();
   }
 
-  public async syncToFile(): Promise<void> {
+  private async syncToFile(): Promise<void> {
     return fs.writeFileSync("data.json", JSON.stringify(this.data));
   }
 

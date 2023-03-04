@@ -3,6 +3,7 @@ import StorageManager from "./services/storage_manager";
 import { helmetMiddleware, corsMiddleware, expressJsonMiddleware, morganMiddleware, urlencodedMiddleware} from './middleware';
 import routes from './routes';
 
+
 export const storageManager: StorageManager = new StorageManager();
 
 const app = express();
