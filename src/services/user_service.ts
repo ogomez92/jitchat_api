@@ -78,6 +78,7 @@ export default class UserService {
     }
 
     user.status = status;
+    console.log('set status for ', user.id)
 
     // Ensure their online presence
     UserService.usersOnline.set(user.id, user);
@@ -114,6 +115,7 @@ export default class UserService {
       } catch (error) {
         console.error(`Could not parse blocked users as json`)
         UserService.blockedUsers = {};
+        storageManager.setKey('blockedUsers', UserService.blockedUsers)
       }
     }
   }

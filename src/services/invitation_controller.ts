@@ -4,35 +4,48 @@ import uuid from 'short-uuid';
 import { sendEventToUser } from "../routes/events";
 import Invitation from "../interfaces/invitation";
 import UserStatus from "../enums/user_status";
+import User from "../interfaces/user";
 
 export default class InvitationController {
-    private static invitations: Invitation[];
+    private static invitations: Invitation[] = [];
+    private static waitingUsers: User[] = []
 
     public static update = () => {
-        const waitingUsers = UserService.getWaitingUsers();
+        this.waitingUsers  = UserService.getWaitingUsers();
 
-        if (waitingUsers.length < 2) {
+        if (this.waitingUsers.length < 2) {
             return;
         }
 
-        waitingUsers.forEach((user) => {
-            const otherUser = waitingUsers.find((u) => u.id !== user.id && UserService.isMatchAllowed(u.id, user.id));
-
-            if (otherUser) {
-                const newInvitation: Invitation = {
-                    users: [user.id, otherUser.id],
-                    id: uuid.generate(),
-                    timestamp: Date.now(),
+        for (let userAIndex = 0; userAIndex < this.waitingUsers.length - 1; userAIndex++) {
+            for (let userBIndex = userAIndex + 1; userBIndex < this.waitingUsers.length; userBIndex++) {
+                if (!UserService.isMatchAllowed(this.waitingUsers[userAIndex].id, this.waitingUsers[userBIndex].id)) {
+                    continue;
                 }
 
-                UserService.setStatus(user.id, UserStatus.INVITED)
-                UserService.setStatus(otherUser.id, UserStatus.INVITED)
-
-                InvitationController.invitations.push(newInvitation);
-                console.log(newInvitation)
-                sendEventToUser(user.id, EventType.INVITATION, JSON.stringify(newInvitation));
-                sendEventToUser(otherUser.id, EventType.INVITATION, JSON.stringify(newInvitation));
+                InvitationController.createInvitation(userAIndex, userBIndex);
+                break;
             }
-        });
-    }
+        }
+    };
+
+    public static createInvitation = (userAIndex: number, userBIndex: number) => {
+        const userA = this.waitingUsers[userAIndex];
+        const userB = this.waitingUsers[userBIndex];
+
+        const newInvitation: Invitation = {
+            users: [userA, userB],
+            id: uuid.generate(),
+            timestamp: Date.now(),
+        };
+
+        UserService.setStatus(userA.id, UserStatus.INVITED);
+        UserService.setStatus(userB.id, UserStatus.INVITED);
+
+        InvitationController.invitations.push(newInvitation);
+        console.log(newInvitation);
+        sendEventToUser(userA.id, EventType.INVITATION, JSON.stringify(newInvitation));
+        sendEventToUser(userB.id, EventType.INVITATION, JSON.stringify(newInvitation));
+    };
+
 }
