@@ -1,4 +1,4 @@
-const PORT = 3456;
+export const PORT = 3456;
 
 import app from './app';
 

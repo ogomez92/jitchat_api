@@ -15,7 +15,7 @@ export default class UserService {
     if (!username || !intro) {
       throw new Error(EndpointError.INVALID_INPUT);
     }
-    
+
     if (!UserService.validateNameAndIntro(username, intro)) {
       throw new Error(EndpointError.INVALID_INPUT);
     }
@@ -64,4 +64,18 @@ export default class UserService {
       InputValidator.isNameValid(name) && InputValidator.isIntroValid(intro)
     );
   };
+
+  public static disconnectUser = (withID: string) => {
+    UserService.usersOnline.delete(withID);
+  }
+
+  public static setStatus = (userID: string, status: UserStatus) => {
+    const user: User | undefined = UserService.usersOnline.get(userID);
+
+    if (!user) {
+      throw new Error(EndpointError.USER_NOT_FOUND);
+    }
+
+    user.status = status;
+  }
 }
