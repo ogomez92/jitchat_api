@@ -21,6 +21,7 @@ router.get('/events/:userID', (req, res) => {
 
   try {
     UserService.setStatus(userID, UserStatus.WAITING)
+    UserService.makeUserActive(userID);
   } catch (error) {
     // Close the connection, because that ID is neither online nor in storage.
     res.end();
@@ -47,13 +48,26 @@ export const sendEventToUser = (userID: string, eventName: EventType, data: stri
   const userResponseHandle: Response | undefined = userEventResponses.get(userID);
 
   if (!userResponseHandle) {
-    console.error(`The specified user does not have a response set.`)
     UserService.disconnectUser(userID);
     return;
   }
 
   userResponseHandle.write(`event: ${eventName}\n`);
   userResponseHandle.write(`data: ${data}\n\n`);
+}
+
+export const closeConnectionForUser = (userID: string) => {
+  const userResponseHandle: Response | undefined = userEventResponses.get(userID);
+
+  if (!userResponseHandle) {
+    return;
+  }
+
+  userResponseHandle.end();
+
+  userEventResponses.delete(userID);
+
+  UserService.disconnectUser(userID);
 }
 
 export default router;

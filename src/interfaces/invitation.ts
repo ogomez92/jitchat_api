@@ -4,8 +4,8 @@ interface Invitation {
     id: string;
     users: User[];
     timestamp: number;
-    accepted?: string;
-    declined?: string;
+    usersAccepted?: string[];
+    usersDeclined?: string[];
 }
 
 export default Invitation;

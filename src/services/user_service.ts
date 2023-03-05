@@ -1,13 +1,17 @@
 import { Request, Response } from "express";
 import EndpointError from "../enums/endpoint_error";
+import { closeConnectionForUser } from "../routes/events";
 import UserStatus from "../enums/user_status";
 import User from "../interfaces/user";
 import { storageManager } from "../app";
 import InputValidator from "../helpers/input_validator";
 import uuid from 'short-uuid';
 
+const USER_MAX_IDLE_TIME = 40000;
+
 export default class UserService {
   public static usersOnline: Map<string, User> = new Map();
+  private static userActivityTimestamps: Map<string, number> = new Map();
   private static blockedUsers: { [key: string]: string[] };
 
   public static addUserWithRequest = async (req: Request): Promise<User> => {
@@ -32,6 +36,7 @@ export default class UserService {
 
     await UserService.storeUser(newUser);
 
+    UserService.userActivityTimestamps.set(newUser.id, Date.now())
     return newUser;
   };
 
@@ -119,4 +124,32 @@ export default class UserService {
     this.loadBlockedUsers();
     return UserService.blockedUsers
   };
+
+  public static getOnlineUserIDs = (): string[] => {
+    const ids: string[] = [];
+
+    UserService.usersOnline.forEach((user: User) => {
+      ids.push(user.id);
+    });
+
+    return ids;
+  }
+
+  public static makeUserActive = (id: string) => {
+    UserService.userActivityTimestamps.set(id, Date.now())
+  }
+
+  public static purgeInactiveUsers = () => {
+    // Waiting users are not considered inactive, so update their timestamps
+    UserService.getWaitingUsers().forEach((user: User) => this.makeUserActive(user.id))
+
+    UserService.userActivityTimestamps.forEach((timestamp: number, id: string) => {
+      if (Date.now() - timestamp > USER_MAX_IDLE_TIME) {
+        UserService.disconnectUser(id);
+        UserService.userActivityTimestamps.delete(id);
+        closeConnectionForUser(id);
+      }
+    })
+
+  }
 }
