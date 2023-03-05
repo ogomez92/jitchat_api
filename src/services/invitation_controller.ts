@@ -17,22 +17,16 @@ export default class InvitationController {
             return;
         }
 
-        for (let userAIndex = 0; userAIndex < this.waitingUsers.length - 1; userAIndex++) {
-            for (let userBIndex = userAIndex + 1; userBIndex < this.waitingUsers.length; userBIndex++) {
-                if (!UserService.isMatchAllowed(this.waitingUsers[userAIndex].id, this.waitingUsers[userBIndex].id)) {
-                    continue;
-                }
+        this.waitingUsers.forEach((user: User) => {
+            const match: User | null = this.findFirstMatchForUser(user);
 
-                InvitationController.createInvitation(userAIndex, userBIndex);
-                break;
+            if (match) {
+                this.createInvitation(user, match);
             }
-        }
+        });
     };
 
-    public static createInvitation = (userAIndex: number, userBIndex: number) => {
-        const userA = this.waitingUsers[userAIndex];
-        const userB = this.waitingUsers[userBIndex];
-
+    public static createInvitation = (userA: User, userB: User) => {
         const newInvitation: Invitation = {
             users: [userA, userB],
             id: uuid.generate(),
@@ -48,4 +42,34 @@ export default class InvitationController {
         sendEventToUser(userB.id, EventType.INVITATION, JSON.stringify(newInvitation));
     };
 
+    public static isMatchAllowed = (userA: string, userB: string) => {
+        if (userA === userB) {
+          return false;
+        }
+        
+        const blockedUsers = UserService.getBlockedUsers();
+
+        if (blockedUsers[userA] && blockedUsers[userA].includes(userB)) {
+          return false;
+        }
+    
+        if (blockedUsers[userB] && blockedUsers[userB].includes(userA)) {
+          return false;
+        }
+    
+        return true;
+      }
+    
+      public static findFirstMatchForUser = (user: User): User | null => {
+        const waitingUsers = UserService.getWaitingUsers();
+    
+        for (const waitingUser of waitingUsers) {
+          if (this.isMatchAllowed(user.id, waitingUser.id)) {
+            return waitingUser;
+          }
+        }
+    
+        return null;
+      }
+    
 }

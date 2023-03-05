@@ -110,31 +110,13 @@ export default class UserService {
 
   public static loadBlockedUsers = () => {
     if (!UserService.blockedUsers) {
-      try {
-        UserService.blockedUsers = JSON.parse(storageManager.getKey('blockedUsers'));
-      } catch (error) {
-        console.error(`Could not parse blocked users as json`)
-        UserService.blockedUsers = {};
-        storageManager.setKey('blockedUsers', UserService.blockedUsers)
-      }
+      UserService.blockedUsers = storageManager.getKey('blockedUsers') || {};
+      storageManager.setKey('blockedUsers', UserService.blockedUsers)
     }
   }
 
-  public static isMatchAllowed = (userA: string, userB: string) => {
-    if (userA === userB) {
-      return false;
-    }
-    
-    UserService.loadBlockedUsers();
-
-    if (UserService.blockedUsers[userA] && UserService.blockedUsers[userA].includes(userB)) {
-      return false;
-    }
-
-    if (UserService.blockedUsers[userB] && UserService.blockedUsers[userB].includes(userA)) {
-      return false;
-    }
-
-    return true;
-  }
+  public static getBlockedUsers = (): { [key: string]: string[] } => {
+    this.loadBlockedUsers();
+    return UserService.blockedUsers
+  };
 }
