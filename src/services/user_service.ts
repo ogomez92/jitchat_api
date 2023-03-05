@@ -46,7 +46,7 @@ export default class UserService {
     const user: User | undefined = UserService.usersOnline.get(id);
 
     if (!user) {
-      const storedUser = storageManager.getKey(id);
+      const storedUser: User = storageManager.getKey(id);
 
       if (storedUser) {
         return storedUser;
@@ -101,23 +101,29 @@ export default class UserService {
     return users;
   }
 
-  public static blockUser = (userA: string, userB: string) => {
+  public static blockUser = (blocker: string, blocked: string) => {
     UserService.loadBlockedUsers();
 
-    if (!UserService.blockedUsers[userA]) {
-      UserService.blockedUsers[userA] = [];
+    if (!UserService.blockedUsers[blocker]) {
+      UserService.blockedUsers[blocker] = [];
     }
 
-    UserService.blockedUsers[userA].push(userB);
+    UserService.blockedUsers[blocker].push(blocked);
 
-    storageManager.setKey('blockedUsers', JSON.stringify(UserService.blockedUsers));
+    storageManager.setKey('blockedUsers', UserService.blockedUsers);
   }
 
   public static loadBlockedUsers = () => {
-    if (!UserService.blockedUsers) {
-      UserService.blockedUsers = storageManager.getKey('blockedUsers') || {};
-      storageManager.setKey('blockedUsers', UserService.blockedUsers)
+    const blockedUsers = storageManager.getKey('blockedUsers');
+
+    if (blockedUsers) {
+      UserService.blockedUsers = blockedUsers
+      return;
     }
+
+    UserService.blockedUsers = {};
+
+    storageManager.setKey('blockedUsers', UserService.blockedUsers)
   }
 
   public static getBlockedUsers = (): { [key: string]: string[] } => {
