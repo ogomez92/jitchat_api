@@ -6,6 +6,7 @@ import User from "../interfaces/user";
 import { storageManager } from "../app";
 import InputValidator from "../helpers/input_validator";
 import uuid from 'short-uuid';
+import InvitationController from "./invitation_controller";
 
 const USER_MAX_IDLE_TIME = 40000;
 
@@ -83,7 +84,6 @@ export default class UserService {
     }
 
     user.status = status;
-    console.log('set status for ', user.id)
 
     // Ensure their online presence
     UserService.usersOnline.set(user.id, user);

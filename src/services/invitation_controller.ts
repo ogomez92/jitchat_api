@@ -1,10 +1,12 @@
 import UserService from "./user_service";
 import EventType from '../enums/event_type'
 import uuid from 'short-uuid';
-import { sendEventToUser } from "../routes/events";
+import { closeConnectionForUser, sendEventToUser } from "../routes/events";
 import Invitation from "../interfaces/invitation";
 import UserStatus from "../enums/user_status";
 import User from "../interfaces/user";
+import EndpointError from "../enums/endpoint_error";
+import RoomHelper from "../helpers/room_helper";
 
 const EXPIRATION_TIME_IN_MILLISECONDS = 40000;
 
@@ -14,7 +16,6 @@ export default class InvitationController {
 
   public static update = () => {
     this.purgeInvitations();
-
     UserService.purgeInactiveUsers();
 
     this.waitingUsers = UserService.getWaitingUsers();
@@ -40,8 +41,8 @@ export default class InvitationController {
     if (match) {
       this.createInvitation(user, match);
     }
-    
-    this.update();
+
+    this.waitingUsers = UserService.getWaitingUsers();
   };
 
   public static createInvitation = (userA: User, userB: User) => {
@@ -99,17 +100,6 @@ export default class InvitationController {
       const userB: string = invitation.users[1].id;
 
       if (invitation.usersDeclined) {
-        const decliner = invitation.usersDeclined.shift();
-        const rejectedUser = invitation.users.find((user) => user.id !== decliner)
-
-        if (rejectedUser && decliner) {
-          sendEventToUser(rejectedUser.id, EventType.INVITATION_EXPIRED, invitation.id);
-          UserService.blockUser(decliner, rejectedUser.id)
-        }
-
-        UserService.setStatus(userA, UserStatus.WAITING);
-        UserService.setStatus(userB, UserStatus.WAITING);
-
         InvitationController.invitations.splice(InvitationController.invitations.indexOf(invitation), 1);
       }
 
@@ -144,7 +134,7 @@ export default class InvitationController {
     const user: User = UserService.getUserWithUUID(userID);
 
     if (!user) {
-      return;
+      throw new Error(EndpointError.USER_NOT_FOUND);
     }
 
     UserService.makeUserActive(userID);
@@ -158,7 +148,51 @@ export default class InvitationController {
     } else {
       invitation.usersDeclined.push(userID);
     }
+    const decliner = invitation.usersDeclined.shift();
+    const rejectedUser = invitation.users.find((user) => user.id !== decliner)
+
+    if (rejectedUser && decliner) {
+      sendEventToUser(rejectedUser.id, EventType.INVITATION_EXPIRED, invitation.id);
+      UserService.blockUser(decliner, rejectedUser.id)
+      UserService.setStatus(decliner, UserStatus.WAITING);
+      UserService.setStatus(rejectedUser.id, UserStatus.WAITING);
+    }
   }
 
   public static findInvitationByID = (invitationID: string): Invitation | undefined => this.invitations.find((invitation: Invitation) => invitation.id === invitationID);
+
+  public static acceptInvitation = (invitationID: string, userID: string) => {
+    const invitation = this.findInvitationByID(invitationID);
+    const user: User = UserService.getUserWithUUID(userID);
+
+    if (!user) {
+      throw new Error(EndpointError.USER_NOT_FOUND);
+    }
+
+    UserService.makeUserActive(userID);
+
+    if (!invitation) {
+      console.log('no invitation found')
+      return;
+    }
+
+    if (!invitation.usersAccepted) {
+      invitation.usersAccepted = [userID];
+      console.log('first user accepted')
+    } else {
+      invitation.usersAccepted.push(userID);
+      console.log('second user accepts')
+
+      const roomID = RoomHelper.generateRoom(invitation);
+
+      sendEventToUser(invitation.users[0].id, EventType.TALK_TIME, roomID)
+      sendEventToUser(invitation.users[1].id, EventType.TALK_TIME, roomID)
+
+      UserService.disconnectUser(invitation.users[0].id)
+      UserService.disconnectUser(invitation.users[1].id)
+
+      InvitationController.invitations.splice(InvitationController.invitations.indexOf(invitation), 1);
+      console.log('invitation removed')
+    }
+  }
 }
