@@ -4,7 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 
 export const corsMiddleware = cors({
-  origin: ["http://localhost:5173", "https://localhost:5173"],
+  origin: ["http://localhost:5173", "https://localhost:5173", "https://jitchat.oriolgomez.com"],
   allowedHeaders: ["Content-Type"],
 });
 
