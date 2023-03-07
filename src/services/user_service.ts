@@ -121,8 +121,6 @@ export default class UserService {
       return;
     }
 
-    UserService.blockedUsers = {};
-
     // storageManager.setKey('blockedUsers', UserService.blockedUsers)
   }
 
