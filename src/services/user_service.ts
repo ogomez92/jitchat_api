@@ -114,7 +114,8 @@ export default class UserService {
   }
 
   public static loadBlockedUsers = () => {
-    const blockedUsers = storageManager.getKey('blockedUsers');
+    // const blockedUsers = storageManager.getKey('blockedUsers');
+    const blockedUsers = {}
 
     if (blockedUsers) {
       UserService.blockedUsers = blockedUsers
@@ -123,7 +124,7 @@ export default class UserService {
 
     UserService.blockedUsers = {};
 
-    storageManager.setKey('blockedUsers', UserService.blockedUsers)
+    // storageManager.setKey('blockedUsers', UserService.blockedUsers)
   }
 
   public static getBlockedUsers = (): { [key: string]: string[] } => {
