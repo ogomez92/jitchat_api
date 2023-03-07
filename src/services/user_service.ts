@@ -115,10 +115,9 @@ export default class UserService {
 
   public static loadBlockedUsers = () => {
     // const blockedUsers = storageManager.getKey('blockedUsers');
-    const blockedUsers = {}
 
-    if (blockedUsers) {
-      UserService.blockedUsers = blockedUsers
+    if (!UserService.blockedUsers) {
+      UserService.blockedUsers = {}
       return;
     }
 
