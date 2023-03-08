@@ -110,7 +110,7 @@ export default class UserService {
 
     UserService.blockedUsers[blocker].push(blocked);
 
-    storageManager.setKey('blockedUsers', UserService.blockedUsers);
+    // storageManager.setKey('blockedUsers', UserService.blockedUsers);
   }
 
   public static loadBlockedUsers = () => {
@@ -156,4 +156,6 @@ export default class UserService {
     })
 
   }
+
+  public static clearBlockedUsers = () => this.blockedUsers = {}
 }
