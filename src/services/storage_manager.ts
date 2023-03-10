@@ -24,4 +24,8 @@ export default class StorageManager {
   public getKey(key: string): any {
     return this.data[key];
   }
+
+  public getData = (): object => {
+    return this.data;
+  }
 }
